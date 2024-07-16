@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
     minLength: 6,
     maxLength: 1024,
   },
+  role: { type: String,
+     enum: ['tenant', 'property_manager', 'property_owner'],
+      required: true 
+    },
   image:{
     type: String,
     default: ""
