@@ -1,21 +1,19 @@
- const express = require('express');
-const router = express.Router();
-const leaseController = require("../controllers/leaseController");
-const authMiddleware = require("../middleware/authMiddleware");
+const express = require('express');
+const leaseController = require('../controllers/leaseController');
+const {verifyAdmin, verifyToken, verifyTenants, shouldBeLogedIn} = require("../middleware/verifyRoles")
 
 
 
 
+const router = express.Router()
 
+// Create Lease
+router.post('/create', verifyAdmin(['property_owner', 'property_manager']), leaseController.createLease);
 
-// Create Lease      (['property_owner', 'property_manager']),
-router.post('/create',  leaseController.createLease);
+// Pay Lease
+router.post('/pay', verifyTenants(['tenant']), leaseController.payLease);
 
-// Pay Lease       (['tenant']),
-router.post('/pay',  leaseController.payLease);
+// Get Lease
+router.get('/get-lease/:id', shouldBeLogedIn, leaseController.getLease);
 
-// Get Lease         (['tenant', 'property_owner', 'property_manager']),
-router.get('/:id',  leaseController.getLease);
-
-module.exports = router;
-  
+module.exports = router

@@ -1,23 +1,29 @@
  const mongoose = require('mongoose');
 
 const PropertySchema = new mongoose.Schema({
-    owner: { type: mongoose.Schema.Types.ObjectId,
+    owner: { type: String,
      ref: 'User', 
      required: true 
     },
-    manager: { type: mongoose.Schema.Types.ObjectId,
+    manager: { type: String,
      ref: 'User', 
      required: false 
     },
+    tittle:{
+        type: String,
+        require: true
+    },
     location: { type: String,
      required: true 
+    },
+    size:{
+        type: String,
+        require: true
     },
     description: { type: String,
      required: true 
     },
     amenities: { type: [String],
-     required: true },
-    photos: { type: [String],
      required: true },
     leaseWorth: { type: Number, 
     required: false 
@@ -29,8 +35,12 @@ const PropertySchema = new mongoose.Schema({
     default: true 
     },
     forSale: { type: Boolean, 
-    default: false 
-    }
+    default: true
+    },
+    isAdmin: {
+        type: Boolean, 
+        default: false 
+       }
 });
  
 const Property = new mongoose.model("Property", PropertySchema)

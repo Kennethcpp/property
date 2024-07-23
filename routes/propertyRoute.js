@@ -1,9 +1,9 @@
  const express = require('express');
 const router = express.Router();
 const propertyController = require('../controllers/propertyController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { verifyTenants, verifyAdmin, shouldBeLogedIn} = require("../middleware/verifyRoles")
 const multer = require('multer');
-const path = require('path');
+const path = require('node:path');
 
 // Setup multer for file uploads
 const storage = multer.diskStorage({
@@ -16,30 +16,21 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-
-
-
-const roles = ['property_manager', 'property_owner'];
-const uploadPhotos = upload.array('photos', 10);
-
-//roles, uploadPhotos,
-router.post('/create',  propertyController.createProperty);
-
-
 // Create Property
-//router.post('/create', [(['property_manager', 'property_owner']), upload.array('photos', 10)], propertyController.createProperty);
+router.post('/create', verifyAdmin(['manager', 'owner']),  propertyController.createProperty);
 
-// Delete Property        (['property_manager', 'property_owner']),
-router.delete('/:id',  propertyController.deleteProperty);
+// Delete Property
+router.delete('/:id', verifyAdmin(['manager', 'owner']), propertyController.deleteProperty);
 
-// Search Properties authMiddleware(),
-router.get('/search',  propertyController.searchProperties);
+// Search Properties
+router.get('/search', propertyController.searchProperties);
 
-// List Property for Sale       (['property_owner']),
-router.put('/:id/list-for-sale',  propertyController.listPropertyForSale);
+// List Property for Sale
+router.put('/:id/list-for-sale', verifyAdmin(['manager', 'owner']), propertyController.listPropertyForSale);
 
-// Buy Property authMiddleware   (['tenant', 'property_owner', 'property_manager']),
-router.post('/buy',  propertyController.buyProperty);
+// Buy Property
+router.post('/buy', shouldBeLogedIn, propertyController.buyProperty);
+
 
 module.exports = router;
- 
+  

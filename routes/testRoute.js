@@ -2,7 +2,7 @@
 const express = require("express")
 
 const {shouldBeLogedIn, shouldBeAdmin} = require("../controllers/testController")
-const {verifyToken} = require("../middleware/verifyTokens")
+const {verifyToken} = require("../middleware/verifyRoles")
 
 
 

@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minLength: 6,
+    maxLength: 100
 
   },
   
@@ -29,15 +30,26 @@ const userSchema = new mongoose.Schema({
     maxLength: 1024,
   },
   role: { type: String,
-     enum: ['tenant', 'property_manager', 'property_owner'],
+     enum: ['tenant', 'manager', 'owner'],
       required: true 
     },
   image:{
     type: String,
     default: ""
-    
   },
-
+  phoneNumber:{
+    type: Number,
+    require: false,
+    minLength: 11,
+    maxLength: 11
+},
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailToken: {
+    type: String,
+  },
 },
 { timestamps: true }
 );

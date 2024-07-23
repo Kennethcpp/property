@@ -1,19 +1,19 @@
 const express = require('express');
-const router = express.Router();
+
 const maintenanceController = require('../controllers/maintenanceController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { verifyTenants, verifyAdmin } = require("../middleware/verifyRoles")
+ 
 
 
 
-
-
-// Create Maintenance Request     (['tenant']),
-router.post('/create',  maintenanceController.createMaintenanceRequest);
+const router = express.Router();
+// Create Maintenance Request     
+router.post('/create', verifyTenants(['tenant']),  maintenanceController.createMaintenanceRequest);
 
 // Get Maintenance Request
-router.get('/:id',  maintenanceController.getMaintenanceRequest);
+router.get('/get-request/:id',  maintenanceController.getMaintenanceRequest);
 
-// Update Maintenance Request      (['property_manager', 'property_owner']), 
-router.put('/:id/update', maintenanceController.updateMaintenanceRequest);
+// Update Maintenance Request       
+router.put('/:id/update', verifyAdmin(['manager', 'owner']), maintenanceController.updateMaintenanceRequest); 
 
 module.exports = router;

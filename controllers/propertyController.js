@@ -1,4 +1,6 @@
- const Property = require("../models/propertySchema");
+const https = require('https') 
+const Property = require('../models/propertySchema');
+const {paystackPayment} = require("../utility/paystackPayment")
 const multer = require('multer');
 const path = require('path');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -18,8 +20,8 @@ exports.createProperty = [upload.array('photos', 10), async (req, res) => {
     const photos = req.files.map(file => file.path);
     try {
         const property = new Property({
-            owner: req.user.id,
-            manager: manager || req.user.id,
+            owner: req.User._id,
+            manager: manager || req.User._id,
             location,
             size,
             amenities,
@@ -62,7 +64,7 @@ exports.listPropertyForSale = async (req, res) => {
         if (!property) {
             return res.status(404).json({ msg: 'Property not found' });
         }
-        if (property.owner.toString() !== req.user.id) {
+        if (property.owner.toString() !== req.User._id) {
             return res.status(401).json({ msg: 'User not authorized' });
         }
         property.forSale = true;
@@ -82,24 +84,22 @@ exports.buyProperty = async (req, res) => {
         if (!property || !property.forSale) {
             return res.status(404).json({ msg: 'Property not available for sale' });
         }
+        res.render("/paystack-gateway").then( 
 
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: property.salePrice * 100,
-            currency: 'usd',
-           
-            payment_method: paymentMethodId,
-            confirm: true
-        });
+        property.isAvailable = false,
+        property.forSale = false,
+        property.owner = req.user._id,
+        await property.save()
 
-        property.isAvailable = false;
-        property.forSale = false;
-        property.owner = req.user.id;
-        await property.save();
+        )
+        //paystackPayment()
 
-        res.json({ msg: 'Property purchased successfully', paymentIntent });
+
+        
+
+        res.json({ msg: 'Property purchased successfully'});
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
     }
 };
- 

@@ -1,11 +1,13 @@
 const mongoose = require("mongoose")
 
 const LeaseSchema = new mongoose.Schema({
-    property: { type: mongoose.Schema.Types.ObjectId,
+  //mongoose.Schema.Types.ObjectId,
+    property: { type: String,
      ref: 'Property',
       required: true
      },
-    tenant: { type: mongoose.Schema.Types.ObjectId,
+     //mongoose.Schema.Types.ObjectId,
+    tenant: { type: String,
      ref: 'User',
       required: true 
     },
@@ -18,6 +20,10 @@ const LeaseSchema = new mongoose.Schema({
     yearlyRent: { type: Number,
      required: true
      },
+     isTenant: {
+      type: Boolean, 
+      default: true 
+     },
     payments: [{ amount: Number,
      date: Date
      }]
@@ -27,5 +33,5 @@ const LeaseSchema = new mongoose.Schema({
 const Lease = new mongoose.model("Lease", LeaseSchema)
 
 module.exports = Lease
-//module.exports = mongoose.model('Lease', LeaseSchema);
- 
+
+  

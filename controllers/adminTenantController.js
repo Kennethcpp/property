@@ -32,11 +32,11 @@ const updateTenant = async(req, res)=>{
     try{
 
         const {id} = req.params.id
-      const {fullname, email, password} = req.body
+      const {fullname, email, password, phoneNumber} = req.body
 
       const updateTenant = await Users.findByIdAndUpdate(
       id,
-      {fullname, email, password},
+      {fullname, email, password, phoneNumber},
       {new: true}
     )
       return res.status(200).json({

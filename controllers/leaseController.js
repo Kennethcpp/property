@@ -1,5 +1,5 @@
-const Lease = require("../models/leaseSchema")
-const Property = require("../models/propertySchema");
+const LeaseRoute = require('../models/leaseSchema');
+const Property = require('../models/propertySchema');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 exports.createLease = async (req, res) => {

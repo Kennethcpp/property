@@ -3,7 +3,7 @@
 const express = require("express")
 
 const {getAllTenant, getOneTenant, updateTenant, deleteTenant }= require("../controllers/adminTenantController")
-const {verifyToken,verifyAdmin } = require("../middleware/verifyTokens")
+const {verifyAdmin } = require("../middleware/verifyRoles")
 
 
 
@@ -13,13 +13,13 @@ const router = express.Router()
 
 
 
-router.get("/getAllUsers", verifyAdmin, getAllTenant)
+router.get("/get-all-tenants", verifyAdmin(['manager', 'owner']), getAllTenant)
 
-router.get("/getOneUser/:id", verifyToken, getOneTenant)
+router.get("/get-one-tenant/:id", verifyAdmin(['manager', 'owner']), getOneTenant)
 
-router.put("/updateUser/:id", verifyToken, updateTenant )
+router.put("/update-tenant/:id", verifyAdmin(['manager', 'owner']), updateTenant )
 
-router.delete("/deleteUser/:id", verifyToken, deleteTenant)
+router.delete("/delete-tenant/:id", verifyAdmin(['manager', 'owner']), deleteTenant)
 
 
 
