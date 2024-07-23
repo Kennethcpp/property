@@ -1,23 +1,33 @@
 //index.jx will be move to api folder later
 
 const express = require("express")
-const cookieParser = require('cookie-parser')
-const routes = require("./routes/routers")
+const mongoose = require("mongoose")
+const cookieParser = require("cookie-parser")
+const authRoute = require("./routes/authRoute")
+const testRoute = require("./routes/testRoute")
+const leaseRoute = require("./routes/leaseRoute")
+const maintenanceRoute = require("./routes/maintenanceRoute")
+const propertyRoute = require("./routes/propertyRoute")
+const adminTenantRoute = require("./routes/adminTenantRoute")
 const cors = require('cors')
 const dotenv = require("dotenv").config()
-const mongoose = require("mongoose")
+
+
+
+
+
+
+
+
+
 const dbconnection = require("./database/dbconfig")
   
-
-
-
-
 const app = express() 
-
 app.use(express.json())
+app.use(cookieParser())
+app.use(cors());
 
-app.use(cors({origin: process.env.CLIENT_URL, credentials: true}));
-
+//{origin: process.env.CLIENT_URL, credentials: true}
 
 
 
@@ -35,7 +45,15 @@ app.get("/", (req, res)=>{
 })
 
 
-app.use(routes)
+
+app.use(authRoute)
+app.use(testRoute)
+app.use(adminTenantRoute)
+app.use(leaseRoute)
+app.use(maintenanceRoute)
+app.use(propertyRoute)
+//app.use(router) */
+
 
 
  
