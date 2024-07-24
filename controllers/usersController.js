@@ -89,14 +89,24 @@ return res.status(200).json({
     return res.status(500).json({message: "can not logIn"})
   } 
     }
+
+
+    const loadDashboard = async(req, res)=>{
+      try{
+
+        res.render("dashboard", {Users: req.session.Users})
+
+      } catch (error) {
+        return res.status(500).json({message: "can't load page at the moment!"})
+      }
+    }
   
  const logout =async(req, res)=>{
   try{
 
     res.clearCookie("passToken")
- return res.status(200).json({
-  message: "Logout Successful"
- })
+  res.status(200).json({message: "Logout Successful"})
+  res.redirect("i/ndex.ejs")
   } catch (error) {
     return res.status(500).json({message: "can't Logout!"})
   }
@@ -202,7 +212,8 @@ module.exports = {
   logout,
   forgotPassword,
   resetpassword,  
-  verifyEmail
+  verifyEmail,
+  loadDashboard
 
 }
  

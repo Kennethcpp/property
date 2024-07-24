@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
     minLength: 11,
     maxLength: 11
 },
+is_online: {
+  type: Boolean,
+  default: "0",
+},
   isVerified: {
     type: Boolean,
     default: false

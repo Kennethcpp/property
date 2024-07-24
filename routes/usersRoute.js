@@ -1,6 +1,6 @@
 const express = require("express")
 
-const {register, login, logout, forgotPassword, resetpassword, verifyEmail} = require("../controllers/usersController")
+const {register, login, logout, forgotPassword, resetpassword, verifyEmail, loadDashboard} = require("../controllers/usersController")
 const  {validateReg, validatelogin, validateForgotPassword} = require("../middleware/authMiddleware")
  
 
@@ -23,6 +23,7 @@ router.get("/reset-password/:id/:passToken", resetpassword)
 
 router.post("/verify-email", verifyEmail)
 
+router.get("/dashboard", loadDashboard)
 
 
 module.exports = router
