@@ -1,4 +1,3 @@
-//index.jx will be move to api folder later
 
 const express = require("express")
 const cors = require('cors')

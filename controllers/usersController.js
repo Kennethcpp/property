@@ -94,9 +94,10 @@ return res.status(200).json({
     const loadDashboard = async(req, res)=>{
       try{
 
-        res.render("dashboard", {Users: req.session.Users})
+        const User = await  Users.find({_id: { $nin:[req.cookie.Users_id]}})
+        res.render("dashboard", {Users: req.cookie.Users, User:User})
 
-      } catch (error) {
+      } catch (error) {  
         return res.status(500).json({message: "can't load page at the moment!"})
       }
     }
