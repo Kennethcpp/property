@@ -20,7 +20,9 @@ const MaintenanceRequestSchema = new mongoose.Schema({
        enum: ['pending', 'in_progress', 'completed'],
         default: 'pending'
        }
-});
+},
+{ timestamps: true }
+);
 
 const MaintenanceRequest = new mongoose.model("MaintenanceRequest", MaintenanceRequestSchema)
 module.exports = MaintenanceRequest  

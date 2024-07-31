@@ -18,7 +18,7 @@ exports.createMaintenanceRequest = async (req, res) => {
 
 exports.getMaintenanceRequest = async (req, res) => {
     try {
-        const maintenanceRequest = await MaintenanceRequest.findById(req.params._id).populate('property').populate('tenant');
+        const maintenanceRequest = await MaintenanceRequest.findById(req.params.id).populate('property').populate('tenant');
         if (!maintenanceRequest) {
             return res.status(404).json({ msg: 'Maintenance request not found' });
         }

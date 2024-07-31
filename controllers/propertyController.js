@@ -1,105 +1,134 @@
 const https = require('https') 
-const Property = require('../models/propertySchema');
 const {paystackPayment} = require("../utility/paystackPayment")
-const multer = require('multer');
+const jsonwebtoken = require("jsonwebtoken")
 const path = require('path');
+const multer = require('multer')
+const Property = require('../models/propertySchema');
+const Users = require("../models/userSchema")
+//const PostDetail = require("../models/postDetailsSchema")
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
-const upload = multer({ storage: storage });
 
-exports.createProperty = [upload.array('photos', 10), async (req, res) => {
-    const { location, size, amenities, leaseWorth, salePrice, manager, forSale } = req.body;
-    const photos = req.files.map(file => file.path);
+
+
+
+
+
+
+exports.createProperty =  async (req, res) => {
+
     try {
-        const property = new Property({
-            owner: req.User._id,
-            manager: manager || req.User._id,
-            location,
-            size,
-            amenities,
-            photos,
-            leaseWorth,
-            salePrice,
-            forSale
+        const passToken = req.cookies.passToken
+
+        const { title, price, address, city, bedroom, bathroom, type, property } = req.body;
+        const images = req.files ? req.files.map(file => file.path) : [];
+
+        const propertys = new Property({
+            
+            title,
+             price, 
+             images,
+            address, 
+            city, 
+            bedroom,
+            bathroom, 
+            type, 
+            property,
         });
-        await property.save();
-        res.json(property);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-}];
+        const token = jsonwebtoken.sign({
+            id: Propertys._id,
+            id: User._id
+          }, process.env.JWT_ACCESSTOKEN )
 
-exports.deleteProperty = async (req, res) => {
-    try {
-        await Property.findByIdAndDelete(req.params.id);
-        res.json({ msg: 'Property removed' });
+          res.cookie("passToken", passToken, {
+            httpOnly: true, 
+            //secure: true
+            
+          }) 
+        await propertys.save();
+        res.status(200).json({message: "Successfull",
+            title: propertys.title,
+             price: propertys.price, 
+             images: propertys.images,
+            address: propertys.address, 
+            city: propertys.city, 
+            bedroom: propertys.bedroom,
+            bathroom: propertys.bathroom, 
+            type: propertys.type, 
+            property: propertys.property,
+            
+            
+        });
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server error');
+        return res.status(500).send('Server error');
     }
 };
 
-exports.searchProperties = async (req, res) => {
-    try {
-        const properties = await Property.find({ isAvailable: true });
-        res.json(properties);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-};
 
-exports.listPropertyForSale = async (req, res) => {
+exports.getProperty = async (propertyId, userId) => {
     try {
-        const property = await Property.findById(req.params.id);
-        if (!property) {
-            return res.status(404).json({ msg: 'Property not found' });
+      const property = await Property.findById(propertyId);
+  
+      if (!property) {
+        return { error: 'Property not found' };
+      }
+  
+      if (property.userId.toString() !== userId.toString()) {
+        return { error: 'Unauthorized access' };
+      }
+      console.log(property)
+      return { property };
+    } catch (error) {
+      return { error: 'An error occurred' };
+    }
+  };
+
+exports.updateProperty = async(req, res) =>{
+    try{
+
+        return  res.status(200).json({message: "Successful!"})
+    } catch (error) {
+        console.log(error)
+    } return res.status(500).json({message: "Failed to update Post"})
+
+}
+
+exports.deleteProperty = async(req, res) =>{
+    const id = req.params.id
+    const passToken = req.cookies.passToken
+    try{
+
+        if(Property.User._Id !== passToken) {
+            return res.status(404).json({message: "not authorized!"})
         }
-        if (property.owner.toString() !== req.User._id) {
-            return res.status(401).json({ msg: 'User not authorized' });
-        }
-        property.forSale = true;
-        property.salePrice = req.body.salePrice;
-        await property.save();
-        res.json(property);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-};
+        await Property.findByIdAndDelete(id)
+        return  res.status(200).json({message: "Successful!"})
+    } catch (error) {
+        console.log(error)
+    } return res.status(500).json({message: "Failed to delete  Post"})
+
+}
 
 exports.buyProperty = async (req, res) => {
-    const { propertyId, paymentMethodId } = req.body;
+    const { type } = req.body;
+    const { id } = req.params
     try {
-        const property = await Property.findById(propertyId);
-        if (!property || !property.forSale) {
-            return res.status(404).json({ msg: 'Property not available for sale' });
+        const property = await Property.findById(id);
+        if (!property || property.type !== 'buy') {
+            return res.status(404).json({ msg: 'Not available for sale!' });
         }
-        res.render("/paystack-gateway").then( 
 
         property.isAvailable = false,
-        property.forSale = false,
-        property.owner = req.user._id,
+        property.isforSale = false,
         await property.save()
+        res.redirect("/paystack-gateway")
 
-        )
-        //paystackPayment()
-
-
-        
-
-        res.json({ msg: 'Property purchased successfully'});
+        return res.status(200).json({ message: 'Successfully go to payment'});
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
     }
 };
+
+

@@ -8,15 +8,18 @@ const mongoose = require("mongoose")
 const path = require('node:path');
 const cookieParser = require("cookie-parser")
 const usersRoute = require("./routes/usersRoute")
-const adminTenantRoute = require("./routes/adminTenantRoute")
 const leaseRoute = require("./routes/leaseRoute")
 const maintenanceRoute = require("./routes/maintenanceRoute")
 const propertyRoute = require("./routes/propertyRoute")
 const testRoute = require("./routes/testRoute")
 const paystackRoute = require("./routes/paystackRoute")
+const chatRoute = require("./routes/chatRoute")
+const messageRoute = require("./routes/messageRoute")
 const dbconnection = require("./database/dbconfig")
 const {Server} = require("socket.io")
- 
+const Paystack = require('@paystack/paystack-sdk');
+const crypto = require('crypto');
+
 
 
 
@@ -25,8 +28,20 @@ app.set("view engine", "ejs")
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({origin: process.env.CLIENT_URL, credentials: true}));
-
 const server = http.createServer(app)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const io = new Server(server, {
     cors:{
@@ -49,15 +64,21 @@ io.on("connection", (socket)=>{
     })
 })
 
-
+app.use((req, res, next) => {
+    req.Users = {
+        roles: ['tenant'] // This should come from your user authentication logic
+    };
+    next();
+});
 //{origin: process.env.CLIENT_URL, credentials: true}
 app.use(usersRoute)
-app.use(adminTenantRoute)
 app.use(leaseRoute)
 app.use(maintenanceRoute)
 app.use(propertyRoute) 
 app.use(testRoute)
 app.use(paystackRoute)
+app.use(chatRoute)
+app.use(messageRoute)
  
  
 

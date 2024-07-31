@@ -1,64 +1,65 @@
+const mongoose = require('mongoose');
+const bcrypt = require("bcrypt")
+const { Schema } = mongoose;
 
-
-const mongoose = require("mongoose")
-
-
-
-const userSchema = new mongoose.Schema({
-    
-  fullname: {
-    type: String,
-    required: true,
-    minLength: 6,
-    maxLength: 100
-
-  },
+const userSchema = new Schema({
   
   email: {
     type: String,
-    required: true,
     unique: true,
-    trim: true,
-    minLength: 6,
-    maxLength: 255,
+    required: true
   },
-
+  fullname: {
+    type: String,
+    unique: true,
+    required: true
+  },
   password: {
     type: String,
+    unique: true,
     required: true,
     minLength: 6,
-    maxLength: 1024,
+    maxLength: 200
   },
-  role: { type: String,
-     enum: ['tenant', 'manager', 'owner'],
-      required: true 
-    },
-  image:{
-    type: String,
+  avatar: {
+    type: String, 
     default: ""
   },
-  phoneNumber:{
-    type: Number,
-    require: false,
-    minLength: 11,
-    maxLength: 11
-},
-is_online: {
+role: { type: String,
+  enum: ['tenant', 'manager', 'owner'],
+   required: true,
+   default: "User",
+ },
+ chatIDs:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Chat'
+ }],
+ isVerified: {
   type: Boolean,
-  default: "0",
+  default: false
 },
-  isVerified: {
-    type: Boolean,
-    default: false
-  },
-  emailToken: {
-    type: String,
-  },
+emailToken: {
+  type: String,
+},
 },
 { timestamps: true }
 );
+
+
+
+
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
+
+
+
+
+
   
 
-const Users = new mongoose.model("Users", userSchema)
 
-module.exports = Users
+
+
+ 
+

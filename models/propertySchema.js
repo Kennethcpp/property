@@ -1,50 +1,69 @@
- const mongoose = require('mongoose');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const PropertySchema = new mongoose.Schema({
-    owner: { type: String,
-     ref: 'User', 
-     required: true 
-    },
-    manager: { type: String,
-     ref: 'User', 
-     required: false 
-    },
-    tittle:{
-        type: String,
-        require: true
-    },
-    location: { type: String,
-     required: true 
-    },
-    size:{
-        type: String,
-        require: true
-    },
-    description: { type: String,
-     required: true 
-    },
-    amenities: { type: [String],
-     required: true },
-    leaseWorth: { type: Number, 
-    required: false 
-    },
-    salePrice: { type: Number,
-     required: false 
-    },
-    isAvailable: { type: Boolean, 
-    default: true 
-    },
-    forSale: { type: Boolean, 
+const typeEnum = ['buy', 'rent'];
+const propertyEnum = ['apartment', 'house', 'land'];
+
+const propertySchema = new Schema({
+  
+  title: {
+    type: String,                 
+    required: true
+  },
+  price: {
+    type: Number,
+    required: true                                       
+  },
+  images: {
+    type: [String],
+    required: true
+  },
+  address: {
+    type: String,
+    required: true
+  },
+  city: {
+    type: String,
+    required: true
+  },
+  bedroom: {
+    type: Number,
+    required: true
+  },
+  bathroom: {
+    type: Number,
+    required: true
+  },
+  type: {
+    type: String,
+    enum: typeEnum,
+    required: true
+  },
+  property: {
+    type: String,
+    enum: propertyEnum,
+    required: true 
+  }, 
+  userId: {
+   type: Schema.Types.ObjectId,
+   ref: 'User',
+   required: true
+  },
+  isAvailable:{
+    type: Boolean,
     default: true
-    },
-    isAdmin: {
-        type: Boolean, 
-        default: false 
-       }
-});
- 
-const Property = new mongoose.model("Property", PropertySchema)
-module.exports = Property
+  },
+  isforSale:{
+    type: Boolean,
+    default: true
+  },
+},
+{ timestamps: true }
+);
 
-//module.exports = mongoose.model('Property', PropertySchema);
- 
+
+
+const Property = mongoose.model('Property', propertySchema);
+
+module.exports = Property;
+

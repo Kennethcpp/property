@@ -3,6 +3,7 @@ const Users = require("../models/userSchema")
 const cors = require('cors')
 const jsonwebtoken = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
+const { updateSearchIndex } = require("../models/propertySchema")
 
 
 
@@ -48,7 +49,7 @@ const validateReg = async(req, res, next)=>{
       next()
 }
 
- const validateEmail = (email) => {
+const validateEmail = (email) => {
   const emailPattern = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/
 
   return emailPattern.test(email);
@@ -98,17 +99,41 @@ const validateDeletedUser = async(req, res, next)=>{
 const validateForgotPassword = async(req, res, next)=>{
 
   const { email } = req.body
+  const passToken = req.cookies.passToken
   let errors =[]
+  
   if(!Users){
     errors.push("User not found")
-  }else if(!passToken){
-    errors.push("Access has been denied.")
-  }
-  next()
+  }else if(!passToken)
+  if(!passToken) {
+      return res.status(401).json({ message: "not Authenticated!"})
+  } 
+  
+   await jsonwebtoken.verify(passToken, process.env.JWT_ACCESSTOKEN, async (err, payload)=>{
+      if(err) return res.status(403).json({message: "Invalid Forgot Password Token!"})
+       req.UserId = payload.id
+      next()
+     })
   
 }
 
+const authPost = async(req, res, next) =>{
+  try{
 
+    const passToken = req.header('Authorization').replace('Bearer ', '');
+    const decoded = jsonwebtoken.verify(passToken, process.env.JWT_ACCESSTOKEN)
+
+    const user = await Users.findOne({ _id: decoded._id })
+
+    if(!user) {
+      throw new Error()
+    }
+    req.user = user
+    next()
+  } catch (error) {
+    return res.status(500).json({message: 'Please Authenticate!'})
+  }
+}
 
 
   
@@ -122,4 +147,5 @@ module.exports = {
   validatelogin,
   validateDeletedUser,
   validateForgotPassword,
+  authPost
 }

@@ -1,4 +1,4 @@
-const LeaseRoute = require('../models/leaseSchema');
+const Lease = require('../models/leaseSchema');
 const Property = require('../models/propertySchema');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 

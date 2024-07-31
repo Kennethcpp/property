@@ -1,35 +1,31 @@
  const express = require('express');
-const router = express.Router();
+ const router = express.Router();
 const propertyController = require('../controllers/propertyController');
-const { verifyTenants, verifyAdmin, shouldBeLogedIn} = require("../middleware/verifyRoles")
-const multer = require('multer');
-const path = require('node:path');
+const upload = require("../middleware/multerConfig")
+const { verifyTenants, verifyAdmin, shouldBeLogedIn, checkOwner} = require("../middleware/verifyRoles")
+const path = require('path');
 
-// Setup multer for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
-const upload = multer({ storage: storage });
+
+
+
+
+
+
+
 
 // Create Property
-router.post('/create', verifyAdmin(['manager', 'owner']),  propertyController.createProperty);
+router.post('/create-property', verifyAdmin(['manager', 'owner']), upload.array('images', 10), propertyController.createProperty);
+
+//get all property
+router.get("/get-all-property", verifyAdmin( ['manager', 'owner']),  propertyController.getProperty)
+
+
+// update Property for Sale
+router.put('/update-property/:id', verifyAdmin(['manager', 'owner']), propertyController.updateProperty);
 
 // Delete Property
-router.delete('/:id', verifyAdmin(['manager', 'owner']), propertyController.deleteProperty);
+router.delete('/delete-property/:id', verifyAdmin(['manager', 'owner']), propertyController.deleteProperty);
 
-// Search Properties
-router.get('/search', propertyController.searchProperties);
-
-// List Property for Sale
-router.put('/:id/list-for-sale', verifyAdmin(['manager', 'owner']), propertyController.listPropertyForSale);
-
-// Buy Property
-router.post('/buy', shouldBeLogedIn, propertyController.buyProperty);
 
 
 module.exports = router;

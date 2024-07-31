@@ -1,3 +1,4 @@
+
 const express = require('express');
 const {paystackPayment} = require("../utility/paystackPayment")
 const propertyController = require('../controllers/propertyController');
@@ -8,7 +9,7 @@ const router = express.Router();
 const cors = require('cors')
 
 
-router.get("/paystack-gateway", paystackPayment)
+router.post("/paystack-gateway", paystackPayment)
 
 
 

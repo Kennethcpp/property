@@ -1,47 +1,80 @@
 const propertyController = require("../controllers/propertyController")
+const customer = require("../models/customerSchema")
 const cors = require('cors')
 
 const https = require('https')
 
-const paystackPayment = (req, res)=>{
-
+const paystackPayment = async(req, res)=>{
+const {email, amount, name} = req.body
 try{
 
-    const https = require('https')
+  const customers = new customer({email, amount, name})
+  const https = require('https')
 
-    const params = JSON.stringify({
-        "email": "customer@email.com",
-        "amount": "15000000"
-      })
-      
-      const options = {
-        hostname: 'api.paystack.co',
-        port: 443,
-        path: '/transaction/initialize',
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer sk_test_33d8f6fd38feb1a347831e22d8340dd46cb0f398',
-          'Content-Type': 'application/json'
-        }
-      }
-      
-      const reqpaystack = https.request(options, respaystack => {
-        let data = ''
-      
-        respaystack.on('data', (chunk) => { 
-          data += chunk
-        });
-      
-        respaystack.on('end', () => {
-          console.log(JSON.parse(data))
-        })
-      }).on('error', error => {
-        console.error(error)
-      })
-      
-      reqpaystack.write(params)
-      reqpaystack.end()
 
+const params = JSON.stringify({
+
+  "email": email,
+
+  "amount": amount,
+
+  "name": name,
+
+  "plan": "PLN_tk31kcu9tg9z06s"
+
+})
+
+
+const options = {
+
+  hostname: 'api.paystack.co',
+
+  port: 443,
+
+  path: '/transaction/initialize',
+
+  method: 'POST',
+
+  headers: {
+
+    Authorization: 'Bearer sk_live_d29d630d37035b556da5f20c5712f8b9f61b0cbc',
+
+    'Content-Type': 'application/json'
+
+  }
+
+}
+
+
+const req = https.request(options, res => {
+
+  let data = ''
+
+
+  res.on('data', (chunk) => {
+
+    data += chunk
+
+  });
+
+
+  res.on('end', () => {
+
+    console.log(JSON.parse(data))
+
+  })
+
+}).on('error', error => {
+
+  console.error(error)
+
+})
+
+
+req.write(params)
+
+req.end()
+await customers.save()
 } catch(error){
     return res.status(500).json({message: error.message})
 }

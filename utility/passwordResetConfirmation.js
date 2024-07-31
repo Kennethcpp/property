@@ -1,4 +1,4 @@
-//REGISTER EMAIL FOR VERIFICATION
+//Forgot Password Email For Verification......
 const {sendEmail} = require("./sendMail")
 
 const sendVerification = (User) =>{
@@ -16,13 +16,13 @@ const sendVerification = (User) =>{
                 <h1>Thanks for using our Services!</h1>
             </div>
             <div style="padding: 20px;">
-                <h1>Hi, ${User.fullname} </h1>
-                <p>Thank you for registering with us. We're excited to have you on board!</p>
-                <p>Please click the button below to verify your email address to complete your registration:</p>
-                <a href="https://localhost:8081/verify-email/${User.emailToken}"style="display: inline-block; padding: 10px 40px; margin: 20px 0; background-color: #4CAF50; color: #ffffff; text-decoration: none; border-radius: 5px;">Verify Email</a>
+                <h1>Hello, ${User.fullname} </h1>
+                <h3>. You have successfully reset your password!</h3>
+                <p>Please click the button below to login now!:</p>
+                <a href="https://localhost:8081/login/"style="display: inline-block; padding: 10px 40px; margin: 20px 0; background-color: #4CAF50; color: #ffffff; text-decoration: none; border-radius: 5px;">Verify Email</a>
                 <p>If you have any questions or need assistance, feel free to contact our support team.</p>
                 <p>Best regards,</p>
-                <p>The [Delta Team] Team</p>
+                <p>The [Smart PropertyEx] Delta Team</p>
             </div>
             <div style="background-color: #f4f4f4; color: #777777; text-align: center; padding: 10px; font-size: 12px;">
                 <p>&copy; 2024 [Smart PropertyEx]. All rights reserved.</p>

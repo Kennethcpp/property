@@ -1,5 +1,6 @@
 const jsonwebtoken = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
+const Users = require("../models/userSchema")
 
 
 
@@ -36,39 +37,73 @@ const verifyToken = async(req, res, next)=>{
 }
 
 
-const verifyTenants =  (permissions)=>{
+const verifyTenants =  (passToken)=>{
+    
+   
+    
 
-    try{
-        
-        return (req, res, next) =>{
-            const userRole = req.body.role
-            if (permissions.includes(userRole)) {
-                next()
+  return async (req, res, next) =>{
+      const passToken = req.cookies.passToken
+      if (!passToken) {
+          res.status(401).json({
+            message: 'Access Denied!.'
+          });
+        } else {
+          await jsonwebtoken.verify(passToken, process.env.JWT_ACCESSTOKEN, function (error, payload) {
+            if (error) {
+              res.status(401).json({
+                message: 'Invalid Token'
+              });
             } else {
-                return res.status(401).json("Your are not a tenant!")
+              if (payload.role.includes('tenant')) {
+                next();
+              } else {
+                res.status(403).json({
+                  message: 'You are not Authorisez!.'
+                })
+              }
             }
-        }
-    } catch (error){
-        return res.status(500).json({message: error.message})
-    }
+          });
+        };
+      
+  }
+
 }
 
-const verifyAdmin =  (permissions)=>{
+const verifyAdmin =  (passToken)=>{
+    
+   
+    
 
-    try{
-        
-        return (req, res, next) =>{
-            const userRole = req.body.role
-            if (permissions.includes(userRole)) {
-                next()
-            } else {
-                return res.status(401).json("Your are not an Admin!")
-            }
+        return async (req, res, next) =>{
+            const passToken = req.cookies.passToken
+            if (!passToken) {
+                res.status(401).json({
+                  message: 'Access Denied! please login first!.'
+                });
+              } else {
+                const decoded = await jsonwebtoken.verify(passToken, process.env.JWT_ACCESSTOKEN, function (error, payload) {
+                  if (error) {
+                    res.status(401).json({
+                      message: 'Invalid Token'
+                    });
+                  } else {
+                    if (payload.role.includes('manager' || 'owner')) {
+                      next();
+                    } else {
+                      res.status(403).json({
+                        message: 'You are not Authorisez!.'
+                      })
+                    }
+                  }
+                
+                });
+              };
+            
         }
-    } catch (error){
-        return res.status(500).json({message: error.message})
-    }
+    
 }
+
 
 
 
@@ -77,5 +112,7 @@ module.exports = {
     verifyToken,
     verifyTenants,
     verifyAdmin,
-    shouldBeLogedIn
+    shouldBeLogedIn,
+   
+  
 }

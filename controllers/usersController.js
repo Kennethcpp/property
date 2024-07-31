@@ -10,8 +10,8 @@ const {sendVerification} = require("../utility/sendVerification")
 
 
 const createToken = (_id) =>{
-  const jwtSecretKey = process.env.JWT_ACCESSTOKEN;
-  return jsonwebtoken.sign({ _id }, jwtSecretKey, {expiresIn: "1h"})
+  const passToken = process.env.JWT_ACCESSTOKEN;
+  return jsonwebtoken.sign({ _id }, passToken, {expiresIn: "1h"})
 }
 // i have not add full authentication and authorization
 //REGISTER A USER
@@ -22,11 +22,11 @@ const register = async(req, res)=>{
     const ExistingUser = await Users.findOne({email})
        if(ExistingUser) return res.status(401).json( "User already Exist!")
         
-        const User = new Users({fullname, email, password, role, phoneNumber, emailToken: crypto.randomBytes(64).toString("hex"),
-        })
+        
       //hashe the password and set new password to be hashed password
       const hashedPassword = await bcrypt.hash(password, 12)
-          
+      const User = new Users({fullname, email, password: hashedPassword, role, phoneNumber, emailToken: crypto.randomBytes(64).toString("hex"),
+      })
       await User.save()
 
       sendVerification(User)
@@ -46,14 +46,76 @@ const register = async(req, res)=>{
   } 
   }
 
-  
+  const getAllTenant = async(req, res)=>{
+    try{
+        const User = await Users.find()
+            
+        return res.status(200).json({ message: "successful",
+          count: User.length,
+          User
+        })
+    } catch(error){
+        return res.status(500).json({message: "Can't get All the Tenant Now!"})
+    }
+}
+
+const getOneTenant = async(req, res)=>{
+    try{
+
+        const {id} = req.params
+    const User = await Users.findById(id)
+    return res.status(200).json({
+      message: "successful",
+      User
+    })
+
+    } catch(err){
+        return res.tsatus(500).json({message: "Can't get This Users!"})
+    }
+}
+
+const updateTenant = async(req, res)=>{
+    try{
+
+        const {id} = req.params.id
+      const {fullname, email, password, phoneNumber} = req.body
+
+      const updateTenant = await Users.findByIdAndUpdate(
+      id,
+      {fullname, email, password, phoneNumber},
+      {new: true}
+    )
+      return res.status(200).json({
+        message: "Your Record was updated successfully.",
+        User: updateTenant 
+      })
+
+    } catch(err){
+        return res.tsatus(500).json({message: "Can Not Update This Users!"})
+    }
+}
+
+const deleteTenant = async(req, res)=>{
+    try{
+
+        const { id } = req.params
+        const deleteTenant = await Users.findByIdAndDelete(id)
+    
+        return res.status(200).json({
+          message: "deleted successfully."
+        })
+
+    } catch(err){
+        return res.tsatus(500).json({message: "Can't get Users!"})
+    }
+}
 
   //login user
 const login = async(req, res)=>{
-  
-    try{
+  const {email, password} = req.body
+   try{
 
-    const {email, password} = req.body
+   
     const User = await Users.findOne({email})
     if(!User){
       return res.status(400).json({
@@ -61,6 +123,8 @@ const login = async(req, res)=>{
       })
     }
 // checking password match
+//const matchPassword = await bcrypt.compare(String(password), String(User.Password));
+
 const matchPassword = await  bcrypt.compare(password, User.password)
 if(!matchPassword){
   return res.status(401).json({
@@ -72,42 +136,38 @@ if(!matchPassword){
 
 const passToken = jsonwebtoken.sign({
   id: User._id,
-  role: User.email,
+  email: User.email,
+  role: User.role
 }, process.env.JWT_ACCESSTOKEN,{expiresIn: "7d"})
 
 res.cookie("passToken", passToken, {
   httpOnly: true, 
-  //secure: tr ue
+  //secure: true
   
 }) 
 return res.status(200).json({
   message: "login successful",
   passToken,
-  User
-})    
-    } catch (error) {
-    return res.status(500).json({message: "can not logIn"})
-  } 
+  email: User.email,
+  role: User.role,
+  phoneNumber: User.phoneNumber,
+  avatar: User.image,
+  isVerified: User.isVerified,
+  
+
+})  } catch (error) {
+  return res.status(500).json({message: error.message})
+} 
+   
+  
     }
 
-
-    const loadDashboard = async(req, res)=>{
-      try{
-
-        const User = await  Users.find({_id: { $nin:[req.cookie.Users_id]}})
-        res.render("dashboard", {Users: req.cookie.Users, User:User})
-
-      } catch (error) {  
-        return res.status(500).json({message: "can't load page at the moment!"})
-      }
-    }
   
  const logout =async(req, res)=>{
   try{
 
     res.clearCookie("passToken")
   res.status(200).json({message: "Logout Successful"})
-  res.redirect("i/ndex.ejs")
   } catch (error) {
     return res.status(500).json({message: "can't Logout!"})
   }
@@ -132,7 +192,7 @@ const passToken = await jsonwebtoken.sign({
 }, process.env.JWT_ACCESSTOKEN,{expiresIn: "1h"})
 
  
-console.log(link) 
+sendVerification(User) 
 return res.status(200).json({
 message: "successful."
 })
@@ -145,17 +205,17 @@ message: "successful."
  //reset password function will come here
 const resetpassword = async (req, res)=>{
   try{
-    const {password, passToken} = req.body
-    //const { passToken} = req.params
+    const {password} = req.body
+    const { emailToken} = req.params
     console.log(req.params)
-    const User = await Users.findOne({passToken})
+    const User = await Users.findOne({emailToken})
      if(!User){
     return  res.status(200).json({
-        message: "User not found"
+        message: "Unauthorized!"
       })
     } 
     
-    const verify = jsonwebtoken.verify(passToken, User.password)
+    const verify = jsonwebtoken.verify(emailToken, User.password)
      if(!verify){
       return res.status(403).json({message: "Unauthorised!"})
     } 
@@ -163,6 +223,7 @@ const resetpassword = async (req, res)=>{
     User.password = hashedPassword
     await User.save()
      
+    sendVerification(User) 
   } catch(error){
     return res.status(500).json({message: error.message})
   }
@@ -209,12 +270,17 @@ const verifyEmail = async (req, res) =>{
 
 module.exports = {
   register,
+  getAllTenant,
+  getOneTenant,
+  updateTenant,
+  deleteTenant,
   login,   
   logout,
   forgotPassword,
   resetpassword,  
   verifyEmail,
-  loadDashboard
+  
+
 
 }
  
