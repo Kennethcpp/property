@@ -24,7 +24,6 @@ const crypto = require('crypto');
 
 
 const app = express()   
-app.set("view engine", "ejs")
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({origin: process.env.CLIENT_URL, credentials: true}));
@@ -92,8 +91,9 @@ app.listen(PORT, ()=>{
 })   
 
 app.get("/", (req, res)=>{
-   res.render("/index.ejs")
+    return res.status(200).json({message: "welcome Smart property.....Delta Team"})
 })
+ 
 
 
 
