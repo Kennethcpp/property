@@ -29,8 +29,17 @@ app.use(cookieParser())
 app.use(cors());
 const server = http.createServer(app)
 
+const PORT = process.env.PORT || 8000
 
+dbconnection()   
 
+app.get("/", (req, res)=>{
+    return res.status(200).json({message: "API WORKING FINE"})
+})
+ 
+app.listen(PORT, ()=>{
+    console.log(`server is running on ${PORT}`)
+})
 
 
 
@@ -82,18 +91,7 @@ app.use(messageRoute)
  
 
  
-const PORT = process.env.PORT || 8000
 
-dbconnection()
-
-app.listen(PORT, ()=>{
-    console.log(`server is running on ${PORT}`)
-})   
-
-app.get("/", (req, res)=>{
-    return res.status(200).json({message: "welcome Smart property.....Delta Team"})
-})
- 
 
 
 
