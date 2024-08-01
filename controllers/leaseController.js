@@ -22,24 +22,31 @@ exports.createLease = async (req, res) => {
 };
 
 exports.payLease = async (req, res) => {
-    const { leaseId, amount, paymentMethodId } = req.body;
+    const { leaseId, amount, propertyId } = req.body;
     try {
         const lease = await Lease.findById(leaseId);
         if (!lease) {
             return res.status(404).json({ msg: 'Lease not found' });
         }
 
-        const paymentIntent = await stripe.paymentIntents.create({
+        const initializeTransaction = await paystack.transaction.initialize({
+            email: propertyId,
             amount: amount * 100,
-            currency: 'usd',
-            payment_method: paymentMethodId,
-            confirm: true
-        });
-
+            plan: `${process.env.PAYSTACK_PLAN_CODE}`,
+            channels: ['card'], // limiting the checkout to show card, as it's the only channel that subscriptions are currently available through
+            callback_url: `${process.env.SERVER_URL}/account.html`,
+          });
+        
+          if (initializeTransaction.status === false) {
+            return console.log(
+              'Error initializing transaction: ',
+              initializeTransaction.message
+            );
+          }
         lease.payments.push({ amount, date: new Date() });
         await lease.save();
 
-        res.json({ msg: 'Payment successful', paymentIntent });
+        res.json({ msg: 'Payment successful', initializeTransaction });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');

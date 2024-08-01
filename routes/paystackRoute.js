@@ -2,7 +2,7 @@
 const express = require('express');
 const {paystackPayment} = require("../utility/paystackPayment")
 const propertyController = require('../controllers/propertyController');
-const path = require('node:path');
+const path = require('path');
 
 
 const router = express.Router();

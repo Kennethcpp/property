@@ -13,7 +13,7 @@ const router = express.Router()
 router.post("/register", validateReg, register)
 
 
-router.get("/get-all-tenants", verifyAdmin(['manager', 'owner']), getAllTenant)
+router.get("/get-all-tenants",  getAllTenant)
 
 router.get("/get-one-tenant/:id", verifyAdmin(['manager', 'owner']), getOneTenant)
 

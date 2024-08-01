@@ -115,16 +115,30 @@ exports.buyProperty = async (req, res) => {
     const { id } = req.params
     try {
         const property = await Property.findById(id);
-        if (!property || property.type !== 'buy') {
+        if (!property || property.type !== 'sale') {
             return res.status(404).json({ msg: 'Not available for sale!' });
         }
-
-        property.isAvailable = false,
-        property.isforSale = false,
+      
+        const initializeTransaction = await paystack.transaction.initialize({
+            email: Users.email,
+            amount: property.price * 100,
+            plan: `${process.env.PAYSTACK_PLAN_CODE}`,
+            channels: ['card'], // limiting the checkout to show card, as it's the only channel that subscriptions are currently available through
+            callback_url: `${process.env.SERVER_URL}/account.html`,
+          });
+        
+          if (initializeTransaction.status === false) {
+            return console.log(
+              'Error initializing transaction: ',
+              initializeTransaction.message
+            );
+          }
+          const transaction = initializeTransaction.data;
+         property.isAvailable = false,
+          property.isforSale = false,
         await property.save()
-        res.redirect("/paystack-gateway")
-
-        return res.status(200).json({ message: 'Successfully go to payment'});
+       
+        return res.status(200).send(transaction);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');

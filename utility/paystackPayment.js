@@ -5,10 +5,10 @@ const cors = require('cors')
 const https = require('https')
 
 const paystackPayment = async(req, res)=>{
-const {email, amount, name} = req.body
+
 try{
 
-  const customers = new customer({email, amount, name})
+ 
   const https = require('https')
 
 
@@ -18,7 +18,6 @@ const params = JSON.stringify({
 
   "amount": amount,
 
-  "name": name,
 
   "plan": "PLN_tk31kcu9tg9z06s"
 

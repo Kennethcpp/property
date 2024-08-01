@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const typeEnum = ['buy', 'rent'];
+const typeEnum = ['sale', 'rent'];
 const propertyEnum = ['apartment', 'house', 'land'];
 
 const propertySchema = new Schema({
