@@ -10,7 +10,7 @@ const router = express.Router()
  
   
 //register
-router.get("/register", validateReg, register)
+router.post("/register", validateReg, register)
 
 
 router.get("/get-all-tenants", verifyAdmin(['manager', 'owner']), getAllTenant)
