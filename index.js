@@ -33,7 +33,7 @@ const PORT = process.env.PORT || 8000
 
 dbconnection()   
 
-app.get("/", (req, res)=>{
+app.post("/", (req, res)=>{
     return res.status(200).json({message: "API WORKING FINE"})
 })
  
