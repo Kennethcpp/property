@@ -2,6 +2,9 @@ const Lease = require('../models/leaseSchema');
 const Property = require('../models/propertySchema');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+
+
+
 exports.createLease = async (req, res) => {
     const { propertyId, tenantId, startDate, endDate, yearlyRent } = req.body;
     try {

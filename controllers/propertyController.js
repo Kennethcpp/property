@@ -6,7 +6,6 @@ const multer = require('multer')
 const Property = require('../models/propertySchema');
 const Users = require("../models/userSchema")
 //const PostDetail = require("../models/postDetailsSchema")
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 
 
@@ -35,16 +34,7 @@ exports.createProperty =  async (req, res) => {
             type, 
             property,
         });
-        const token = jsonwebtoken.sign({
-            id: Propertys._id,
-            id: User._id
-          }, process.env.JWT_ACCESSTOKEN )
-
-          res.cookie("passToken", passToken, {
-            httpOnly: true, 
-            //secure: true
-            
-          }) 
+        
         await propertys.save();
         res.status(200).json({message: "Successfull",
             title: propertys.title,
