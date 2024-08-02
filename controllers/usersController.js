@@ -52,12 +52,7 @@ const register = async(req, res)=>{
             
         return res.status(200).json({ message: "successful",
           count: User.length,
-          id: User._id,
-          User: User.fullname,
-          email: User.email,
-          role: User.role,
-          phoneNumber: User.phoneNumber
-
+          User
         })
     } catch(error){
         return res.status(500).json({message: "Can't get All the Tenant Now!"})
