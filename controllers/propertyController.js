@@ -5,11 +5,6 @@ const path = require('path');
 const multer = require('multer')
 const Property = require('../models/propertySchema');
 const Users = require("../models/userSchema")
-//const PostDetail = require("../models/postDetailsSchema")
-
-
-
-
 
 
 
@@ -17,8 +12,6 @@ const Users = require("../models/userSchema")
 exports.createProperty =  async (req, res) => {
 
     try {
-        const passToken = req.cookies.passToken
-
         const { title, price, address, city, bedroom, bathroom, type, property } = req.body;
         const images = req.files ? req.files.map(file => file.path) : [];
 
@@ -33,10 +26,22 @@ exports.createProperty =  async (req, res) => {
             bathroom, 
             type, 
             property,
+           
         });
+        const propToken = jsonwebtoken.sign({
+            id: propertys._id,
+            
+          }, process.env.PROPERTY_TOKEN)
+          
+          res.cookie("propToken", propToken, {
+            httpOnly: true, 
+            //secure: true
+            
+          }) 
         
         await propertys.save();
         res.status(200).json({message: "Successfull",
+          id: propertys._id,
             title: propertys.title,
              price: propertys.price, 
              images: propertys.images,
@@ -46,6 +51,7 @@ exports.createProperty =  async (req, res) => {
             bathroom: propertys.bathroom, 
             type: propertys.type, 
             property: propertys.property,
+            propToken
             
             
         });
@@ -56,42 +62,46 @@ exports.createProperty =  async (req, res) => {
 };
 
 
-exports.getProperty = async (propertyId, userId) => {
-    try {
-      const property = await Property.findById(propertyId);
-  
-      if (!property) {
-        return { error: 'Property not found' };
-      }
-  
-      if (property.userId.toString() !== userId.toString()) {
-        return { error: 'Unauthorized access' };
-      }
-      console.log(property)
-      return { property };
-    } catch (error) {
-      return { error: 'An error occurred' };
-    }
-  };
-
-exports.updateProperty = async(req, res) =>{
+exports.getProperty= async(req, res)=>{
     try{
 
-        return  res.status(200).json({message: "Successful!"})
-    } catch (error) {
-        console.log(error)
-    } return res.status(500).json({message: "Failed to update Post"})
+        const {id} = req.params
+    const propertys = await Property.findById(id)
+    return res.status(200).json({
+      message: "successful",
+      propertys
+    })
 
+    } catch(err){
+        return res.tsatus(500).json({message: "Can't get This property at the moment!"})
+    }
+}
+
+exports.updateProperty = async(req, res)=>{
+    try{
+
+        const {id} = req.params
+      const {title, price, images, address, city, bedroom, bathroom, type, property} = req.body
+
+      const updateProperty = await Users.findByIdAndUpdate(
+      id,
+      {title, price, images, address, city, bedroom,bathroom, type, property},
+      {new: true}
+    )
+      return res.status(200).json({
+        message: "Your Record was updated successfully.",
+        propertys: updateProperty 
+      })
+
+    } catch(err){
+        return res.tsatus(500).json({message: "Can Not Update This Property!"})
+    }
 }
 
 exports.deleteProperty = async(req, res) =>{
-    const id = req.params.id
-    const passToken = req.cookies.passToken
+    const id = req.params
     try{
 
-        if(Property.User._Id !== passToken) {
-            return res.status(404).json({message: "not authorized!"})
-        }
         await Property.findByIdAndDelete(id)
         return  res.status(200).json({message: "Successful!"})
     } catch (error) {
@@ -104,29 +114,30 @@ exports.buyProperty = async (req, res) => {
     const { type } = req.body;
     const { id } = req.params
     try {
-        const property = await Property.findById(id);
-        if (!property || property.type !== 'sale') {
+        const propertys = await Property.findById(id);
+        if (!propertys || propertys.type !== 'sale') {
             return res.status(404).json({ msg: 'Not available for sale!' });
-        }
-      
-        const initializeTransaction = await paystack.transaction.initialize({
-            email: Users.email,
-            amount: property.price * 100,
-            plan: `${process.env.PAYSTACK_PLAN_CODE}`,
-            channels: ['card'], // limiting the checkout to show card, as it's the only channel that subscriptions are currently available through
-            callback_url: `${process.env.SERVER_URL}/account.html`,
-          });
-        
-          if (initializeTransaction.status === false) {
-            return console.log(
-              'Error initializing transaction: ',
-              initializeTransaction.message
-            );
-          }
+        }else{
+
+            const initializeTransaction = await paystack.transaction.initialize({
+                email: Users.email,
+                amount: propertys.price * 100,
+                plan: `${process.env.PAYSTACK_PLAN_CODE}`,
+                channels: ['card'], // limiting the checkout to show card, as it's the only channel that subscriptions are currently available through
+                callback_url: `${process.env.SERVER_URL}/account.html`,
+              });
+            
+              if (initializeTransaction.status === false) {
+                return console.log(
+                  'Error initializing transaction: ',
+                  initializeTransaction.message
+                );
+              }
+        }  
           const transaction = initializeTransaction.data;
-         property.isAvailable = false,
-          property.isforSale = false,
-        await property.save()
+         propertys.isAvailable = false,
+          propertys.isforSale = false,
+        await propertys.save()
        
         return res.status(200).send(transaction);
     } catch (err) {

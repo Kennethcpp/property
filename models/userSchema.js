@@ -7,6 +7,7 @@ const userSchema = new Schema({
   email: {
     type: String,
     unique: true,
+    trim: true,
     required: true
   },
   fullname: {
@@ -26,7 +27,7 @@ const userSchema = new Schema({
     default: ""
   },
 role: { type: String,
-  enum: ['tenant', 'manager', 'owner'],
+  enum: ['tenant', 'landlord', 'Landlord'],
    required: true,
    default: "User",
  },

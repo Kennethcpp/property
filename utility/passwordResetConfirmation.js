@@ -1,7 +1,7 @@
 //Forgot Password Email For Verification......
 const {sendEmail} = require("./sendMail")
 
-const sendVerification = (User) =>{
+const passwordResetEmail = (User) =>{
     const Transporter = sendEmail()
 
      const mailDetails = {
@@ -43,4 +43,4 @@ const sendVerification = (User) =>{
     })
 }
 
-module.exports = { sendVerification}
+module.exports = { passwordResetEmail}

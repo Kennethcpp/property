@@ -2,15 +2,10 @@ const mongoose = require("mongoose")
 
 const LeaseSchema = new mongoose.Schema({
   //mongoose.Schema.Types.ObjectId,
-    property: { type: mongoose.Schema.Types.ObjectId,
-     ref: 'Property',
-      required: true
-     },
-     //mongoose.Schema.Types.ObjectId,
-    tenant: { type: mongoose.Schema.Types.ObjectId,
-     ref: 'User',
-      required: true 
-    },
+   email:{
+    type: String,
+    require: true
+   },
     startDate: { type: Date,
      required: true
      },

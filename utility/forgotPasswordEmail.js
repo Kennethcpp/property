@@ -1,7 +1,7 @@
 //Forgot Password Email For Verification......
 const {sendEmail} = require("./sendMail")
 
-const sendVerification = (User) =>{
+const forgotPasswordEmail = (User) =>{
     const Transporter = sendEmail()
 
      const mailDetails = {
@@ -19,7 +19,7 @@ const sendVerification = (User) =>{
                 <h1>Hi, ${User.fullname} </h1>
                 <h2>You have requested for a password reset on your account!</h2>
                 <p>Please click the button below to reset your password:</p>
-                <a href="https://localhost:8081/reset-password/${User.emailToken}"style="display: inline-block; padding: 10px 40px; margin: 20px 0; background-color: #4CAF50; color: #ffffff; text-decoration: none; border-radius: 5px;">Verify Email</a>
+                <a href="https://localhost:8081/reset-password/${User.resetToken}"style="display: inline-block; padding: 10px 40px; margin: 20px 0; background-color: #4CAF50; color: #ffffff; text-decoration: none; border-radius: 5px;">Verify Email</a>
                 <p>If you have not initiated this request please contact our support team now!.</p>
                 <p>Best regards,</p>
                 <p>The [Smart PropertyEx] Delta Team</p>
@@ -43,4 +43,4 @@ const sendVerification = (User) =>{
     })
 }
 
-module.exports = { sendVerification}
+module.exports = { forgotPasswordEmail}

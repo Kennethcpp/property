@@ -1,37 +1,46 @@
 const Lease = require('../models/leaseSchema');
+const Users = require("../models/userSchema")
 const Property = require('../models/propertySchema');
+const jsonwebtoken = require('jsonwebtoken')
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 
 
 
 exports.createLease = async (req, res) => {
-    const { propertyId, tenantId, startDate, endDate, yearlyRent } = req.body;
+    const {email, startDate, endDate, yearlyRent } = req.body;
+    const {id} = req.params
     try {
+        const propertys =  await Property.findById(id)
+         if(!Property){
+            return res.status(401).json({message: 'this property is not available!'})
+         }
+        
+         const User = await Users.findOne({email})
+         if(!User)  {
+            return res.status(403).json({message: "user not rigistered! please register first"})
+         }else{
+            if(email !== User.email){
+                return res.status(400).json({message: "your email must match your registered email!"})
+            }
+         }
+            
         const lease = new Lease({
-            property: propertyId,
-            tenant: tenantId,
+            email,
             startDate,
             endDate,
             yearlyRent,
-            payments: []
         });
+        
+        const leaseToken = jsonwebtoken.sign({
+            id: lease._id,
+            id: User._id,
+            is: propertys._id
+        }, process.env.PROPERTY_TOKEN )
+
         await lease.save();
-        res.json(lease);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-};
-
-exports.payLease = async (req, res) => {
-    const { leaseId, amount, propertyId } = req.body;
-    try {
-        const lease = await Lease.findById(leaseId);
-        if (!lease) {
-            return res.status(404).json({ msg: 'Lease not found' });
-        }
-
+        
+        
         const initializeTransaction = await paystack.transaction.initialize({
             email: propertyId,
             amount: amount * 100,
@@ -49,7 +58,18 @@ exports.payLease = async (req, res) => {
         lease.payments.push({ amount, date: new Date() });
         await lease.save();
 
-        res.json({ msg: 'Payment successful', initializeTransaction });
+        res.json({ msg: 'Payment successful',
+             initializeTransaction,
+             lease });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+exports.payLease = async (req, res) => {
+    
+    try {
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');

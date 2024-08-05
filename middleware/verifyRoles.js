@@ -105,6 +105,58 @@ const verifyAdmin =  (passToken)=>{
 }
 
 
+// VERIFY PROTERTY OWNER
+const verifyOwner =  (passToken)=>{
+    
+   
+    
+
+  return async (req, res, next) =>{
+      const propToken = req.cookies.propToken
+      if (!propToken) {
+          res.status(401).json({
+            message: 'Access Denied! Invalid passtoken!.'
+          });
+        } else {
+          const decoded = await jsonwebtoken.verify(propToken, process.env.PROPERTY_TOKEN, function (error, payload) {
+            if (error) {
+              res.status(401).json({
+                message: 'Invalid Token'
+              });
+            } else {
+              if (payload.propertys.includes(propertys._id)) {
+                next();
+              } else {
+                res.status(403).json({
+                  message: 'You are not Authorisez!.'
+                })
+              }
+            }
+          
+          });
+        };
+      
+  }
+
+}
+
+// Middleware to check if the user owns the post
+async function checkPostOwnership(req, res, next) {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    if (post.author.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+}
+
+
 
 
 
@@ -113,6 +165,7 @@ module.exports = {
     verifyTenants,
     verifyAdmin,
     shouldBeLogedIn,
+    verifyOwner
    
   
 }

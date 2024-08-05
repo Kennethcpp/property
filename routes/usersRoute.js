@@ -1,8 +1,8 @@
 const express = require("express")
 
 const {register, login, logout, forgotPassword, resetpassword, verifyEmail, getAllTenant, getOneTenant, updateTenant, deleteTenant} = require("../controllers/usersController")
-const  {validateReg, validatelogin, validateForgotPassword} = require("../middleware/authMiddleware")
-const {verifyAdmin } = require("../middleware/verifyRoles")
+const  {validateReg, validatelogin, validateForgotPassword, validateResetPassword} = require("../middleware/authMiddleware")
+const {verifyAdmin} = require("../middleware/verifyRoles")
 
  
 
@@ -30,7 +30,7 @@ router.post("/logout", logout)
 //forgot password
 router.post("/forgotPassword", validateForgotPassword,forgotPassword)
 
-router.get("/reset-password/:id/:passToken", resetpassword)
+router.get("/reset-password/:resetToken", validateResetPassword, resetpassword)
 
 router.post("/verify-email", verifyEmail)
 

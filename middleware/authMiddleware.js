@@ -117,18 +117,23 @@ const validateForgotPassword = async(req, res, next)=>{
   
 }
 
-const authPost = async(req, res, next) =>{
+const validateResetPassword = async(req, res, next) =>{
   try{
 
-    const passToken = req.header('Authorization').replace('Bearer ', '');
-    const decoded = jsonwebtoken.verify(passToken, process.env.JWT_ACCESSTOKEN)
+    let errors =[]
+    const { Password} = req.body
+    const { resetToken} = req.params
+    if(!(resetToken))
+      errors.push("Not Authorisez!")
 
-    const user = await Users.findOne({ _id: decoded._id })
+    const verify = jsonwebtoken.verify({resetToken})
+    if(!verify) 
+      errors.push("Not verified cridentials!")
 
-    if(!user) {
-      throw new Error()
+      // update the password here
+    if(Password.length < 6) {
+      errors.push("Password must be more than 6 characters length!")
     }
-    req.user = user
     next()
   } catch (error) {
     return res.status(500).json({message: 'Please Authenticate!'})
@@ -147,5 +152,6 @@ module.exports = {
   validatelogin,
   validateDeletedUser,
   validateForgotPassword,
-  authPost
+  validateResetPassword
+ 
 }

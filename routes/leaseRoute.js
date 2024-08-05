@@ -12,7 +12,7 @@ const router = express.Router()
 router.post('/create', verifyTenants(['tenant']), leaseController.createLease);
 
 // Pay Lease
-router.post('/pay', verifyTenants(['tenant']), leaseController.payLease);
+//router.post('/pay', verifyTenants(['tenant']), leaseController.payLease);
 
 // Get Lease
 router.get('/get-lease/:id', shouldBeLogedIn, leaseController.getLease);

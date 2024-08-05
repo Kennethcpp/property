@@ -5,7 +5,8 @@ const jsonwebtoken = require("jsonwebtoken")
 const dotenv = require("dotenv")
 const crypto = require("crypto")
 const {sendVerification} = require("../utility/sendVerification")
-
+const {forgotPasswordEmail} = require("../utility/forgotPasswordEmail")
+const {passwordResetEmail} = require("../utility/passwordResetConfirmation")
 
 
 
@@ -22,7 +23,8 @@ const register = async(req, res)=>{
     const ExistingUser = await Users.findOne({email})
        if(ExistingUser) return res.status(401).json( "User already Exist!")
         
-        
+//const duplicate = Users.find(person => person.fullname === User)
+//if(duplicate) return res.sendStatus(409)
       //hashe the password and set new password to be hashed password
       const hashedPassword = await bcrypt.hash(password, 12)
       const User = new Users({fullname, email, password: hashedPassword, role, phoneNumber, emailToken: crypto.randomBytes(64).toString("hex"),
@@ -186,15 +188,16 @@ if(!User){
 }
 
 
-const passToken = await jsonwebtoken.sign({
+const resetToken = await jsonwebtoken.sign({
   id: User._id,
  email: User.email
 }, process.env.JWT_ACCESSTOKEN,{expiresIn: "1h"})
 
  
-sendVerification(User) 
+forgotPasswordEmail(User) 
 return res.status(200).json({
-message: "successful."
+message: "successful.",
+resetToken
 })
   } catch (error) {
     return res.status(500).json({message: error.message})
@@ -206,24 +209,20 @@ message: "successful."
 const resetpassword = async (req, res)=>{
   try{
     const {password} = req.body
-    const { emailToken} = req.params
-    console.log(req.params)
-    const User = await Users.findOne({emailToken})
+    const {resetToken}= req.params
+    const User = await Users.findOne({resetToken})
      if(!User){
-    return  res.status(200).json({
-        message: "Unauthorized!"
+    return  res.status(403).json({
+        message: "No token found!"
       })
     } 
-    
-    const verify = jsonwebtoken.verify(emailToken, User.password)
-     if(!verify){
-      return res.status(403).json({message: "Unauthorised!"})
-    } 
+
     const hashedPassword = await bcrypt.hash(password, 12)
     User.password = hashedPassword
     await User.save()
+    passwordResetEmail(User)
+     return res.status(200).json({message: "password Reset was successful!"})
      
-    sendVerification(User) 
   } catch(error){
     return res.status(500).json({message: error.message})
   }
@@ -246,7 +245,7 @@ const verifyEmail = async (req, res) =>{
       await User.save()
 
       const passToken = createToken(User._id)
-      return res.status(200).json({message: "successful",
+      return res.status(200).json({message: "successful",                              
         _id: User._id,
         name: User.fullname,
         email: User.email,

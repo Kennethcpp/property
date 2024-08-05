@@ -44,11 +44,7 @@ const propertySchema = new Schema({
     enum: propertyEnum,
     required: true 
   }, 
-  userId: {
-   type: Schema.Types.ObjectId,
-   ref: 'User',
-   required: true
-  },
+  
   isAvailable:{
     type: Boolean,
     default: true
