@@ -257,7 +257,7 @@ const verifyEmail = async (req, res) =>{
       })
     } else res.status(404).json("Email verification failed, invalid passToken!.")
   } catch (error) {
-    console.log(error)
+    console.log(verifyEmail)
     res.status(500).json(json(error.message))
   }
 }

@@ -1,38 +1,39 @@
 const express = require("express")
 
 const {register, login, logout, forgotPassword, resetpassword, verifyEmail, getAllTenant, getOneTenant, updateTenant, deleteTenant} = require("../controllers/usersController")
-const  {validateReg, validatelogin, validateForgotPassword, validateResetPassword} = require("../middleware/authMiddleware")
-const {verifyAdmin} = require("../middleware/verifyRoles")
+//const  {validateReg, validatelogin, validateForgotPassword, validateResetPassword} = require("../middleware/authMiddleware")
+//const {verifyAdmin} = require("../middleware/verifyRoles")
 
  
 
 const router = express.Router()   
  
   
-//register
-router.post("/register", validateReg, register)
+//register //validateReg
+router.post("/register", register)
 
+//verifyAdmin(['manager', 'owner']),
+router.get("/get-all-tenants",  getAllTenant)
 
-router.get("/get-all-tenants", verifyAdmin(['manager', 'owner']), getAllTenant)
+//verifyAdmin(['manager', 'owner']),
+router.get("/get-one-tenant/:id",  getOneTenant)
+// verifyAdmin(['manager', 'owner']),
+router.put("/update-tenant/:id", updateTenant )
+//verifyAdmin(['manager', 'owner']),
+router.delete("/delete-tenant/:id",  deleteTenant)
 
-router.get("/get-one-tenant/:id", verifyAdmin(['manager', 'owner']), getOneTenant)
-
-router.put("/update-tenant/:id", verifyAdmin(['manager', 'owner']), updateTenant )
-
-router.delete("/delete-tenant/:id", verifyAdmin(['manager', 'owner']), deleteTenant)
-
-//login
-router.post("/login", validatelogin, login)
+//login  //validatelogin,
+router.post("/login",  login)
 
 //logout
 router.post("/logout", logout)
 
-//forgot password
-router.post("/forgotPassword", validateForgotPassword,forgotPassword)
+//forgot password //validateForgotPassword,
+router.post("/forgotPassword", forgotPassword)
+//validateResetPassword,
+router.get("/reset-password/:resetToken",  resetpassword)
 
-router.get("/reset-password/:resetToken", validateResetPassword, resetpassword)
-
-router.post("/verify-email", verifyEmail)
+router.post("/", verifyEmail)
 
 //router.get("/dashboard", loadDashboard)
 
